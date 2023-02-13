@@ -7,143 +7,7 @@ use sdl2::rect::{Point, Rect};
 use std::collections::HashSet;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
-
-struct Sprite {
-    x: i32,
-    y: i32,
-    w: u32,
-    h: u32,
-    color: Color,
-}
-struct Sprite_with_float {
-    x: f64,
-    y: f64,
-    w: u32,
-    h: u32,
-    color: Color,
-}
-
-struct Object{
-    sprite : Sprite_with_float,
-    force_y : f64,
-    force_x: f64,
-    max_gravity: f64,
-    max_force_x: f64,
-    speed : f64,
-    jump_force : f64,
-    friction : f64,
-    gravity: f64,
-    has_jump: bool,
-    colliders : Vec<Sprite>,
-}
-
-trait Gravity {
-    fn gravity(&mut self);
-}
-impl Gravity for Object {
-    fn gravity(&mut self) {
-        let mut on_ground = false;
-        for colliders in self.colliders.iter() {
-            if self.sprite.x + self.sprite.w as f64 > colliders.x as f64
-                && self.sprite.x < colliders.x as f64 + colliders.w as f64
-                && self.sprite.y + 1.1 +  self.sprite.h as f64  > colliders.y  as f64
-                && self.sprite.y < colliders.y as f64 + colliders.h as f64
-            {
-                on_ground = true;
-            }
-        }
-
-        if on_ground{
-            if self.force_y > 0.0{
-                self.force_y = 0.0;
-            }
-            if self.force_x > 0.0{
-                self.force_x -= self.friction;
-                if self.force_x < 0.0{
-                    self.force_x = 0.0;
-                }
-            } else if self.force_x < 0.0 {
-                self.force_x += self.friction;
-                if self.force_x > 0.0{
-                    self.force_x = 0.0;
-                }
-            }
-            self.has_jump = true;
-            return;
-        }
-            self.has_jump = false;
-        
-        if self.force_y < self.max_gravity {
-            self.force_y += self.gravity;
-        }
-    }
-}
-trait Move {
-    fn move_left(&mut self);
-    fn move_right(&mut self);
-    fn jump(&mut self);
-    fn update(&mut self);
-}
-impl Move for Object {
-    fn update(&mut self){
-        self.gravity();
-        self.sprite.y += self.force_y;
-        self.sprite.x += self.force_x;
-        for colliders in self.colliders.iter() {
-            if self.sprite.x + self.sprite.w as f64 > colliders.x as f64
-                && self.sprite.x < colliders.x as f64 + colliders.w as f64
-                && self.sprite.y + 1.0 + self.sprite.h as f64  > colliders.y  as f64
-                && self.sprite.y < colliders.y as f64 + colliders.h as f64
-            {
-                print!("1 , \n");
-                self.sprite.y = colliders.y as f64 - self.sprite.h as f64 - 1.0;
-            }
-            if self.sprite.x + self.sprite.w as f64 > colliders.x as f64
-                && self.sprite.x < colliders.x as f64 + colliders.w as f64
-                && self.sprite.y + self.sprite.h as f64  > colliders.y  as f64
-                && self.sprite.y - 1.0 < colliders.y as f64 + colliders.h as f64
-            {
-                print!("2, \n");
-                self.sprite.y = colliders.y as f64 - 1.0;
-            }
-            if self.sprite.x + self.sprite.w as f64 > colliders.x as f64
-                && self.sprite.x - 1.0 < colliders.x as f64 + colliders.w as f64
-                && self.sprite.y + self.sprite.h as f64  > colliders.y  as f64
-                && self.sprite.y < colliders.y as f64 + colliders.h as f64
-            {
-                print!("3, \n");
-                self.sprite.x = colliders.x as f64 + colliders.w as f64 + 1.0;
-            }
-            if self.sprite.x + 1.0 + self.sprite.w as f64 > colliders.x as f64
-                && self.sprite.x < colliders.x as f64 + colliders.w as f64
-                && self.sprite.y + self.sprite.h as f64  > colliders.y  as f64
-                && self.sprite.y  < colliders.y as f64 + colliders.h as f64
-            {
-                print!("4, \n");
-                self.sprite.x = colliders.x as f64 - 1.0;
-            }
-        }
-    }
-    fn move_left(&mut self) {
-        if self.force_x > -self.max_force_x  {
-                self.force_x -= self.speed;
-        }
-        
-    }
-    fn move_right(&mut self) {
-        if self.force_x > -self.max_force_x  {
-            self.force_x += self.speed;
-        }
-    }
-    fn jump(&mut self){
-        if  self.has_jump {
-
-                self.has_jump = false;
-                self.force_y -= self.jump_force;
-
-        }
-    }
-}
+mod player;
 
 fn  main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
@@ -158,23 +22,23 @@ fn  main() -> Result<(), String> {
         .software()
         .build()
         .map_err(|e| e.to_string())?;
-    let mut sprites = Vec::new();
-    sprites.push(Sprite {
+    let mut Sprites = Vec::new();
+    Sprites.push(player::sprite::Sprite {
         x: 0,
         y: 200,
         w: 300,
         h: 20,
         color: Color::RGBA(0, 0, 255, 0),
     });
-    sprites.push(Sprite {
+    Sprites.push(player::sprite::Sprite {
         x: 400,
         y: 250,
         w: 100,
         h: 20,
         color: Color::RGBA(0, 0, 255, 0),
     });
-    let mut sprite: Object = Object {
-        sprite: Sprite_with_float 
+    let mut player: player::Player = player::Player {
+        sprite: player::SpriteWithFloat 
         { x: 50.0, y: 0.0, w: 10, h: 10, color: Color::RGBA(0, 0, 255, 0) },
         force_x: 0.1,
         force_y: 0.0,
@@ -184,7 +48,7 @@ fn  main() -> Result<(), String> {
         jump_force: 4.0,
         gravity: 0.1,
         has_jump: false,
-        colliders: sprites,
+        colliders: Sprites,
         friction: 0.01,
     };
     let interval = Duration::from_millis(10);
@@ -216,20 +80,20 @@ fn  main() -> Result<(), String> {
             .filter_map(Keycode::from_scancode)
             .collect();
         if keys.contains(&Keycode::Right) {
-            sprite.move_right()
+            player.move_right()
         }
         if keys.contains(&Keycode::Left) {
-            sprite.move_left();
+            player.move_left();
         }
         if keys.contains(&Keycode::Space) && !old_keys.contains(&Keycode::Space) {
-            sprite.jump();
+            player.jump();
         }
         old_keys = keys;
-        sprite.update();
+        player.update();
         canvas
             .with_texture_canvas(&mut texture, |texture_canvas| {
                 texture_canvas.clear();
-                for collider in sprite.colliders.iter() {
+                for collider in player.colliders.iter() {
                     texture_canvas.set_draw_color(collider.color);
                     texture_canvas
                         .fill_rect(Rect::new(
@@ -240,9 +104,9 @@ fn  main() -> Result<(), String> {
                         ))
                         .expect("could not fill rect");
                 }
-                texture_canvas.set_draw_color(sprite.sprite.color);
+                texture_canvas.set_draw_color(player.sprite.color);
                 texture_canvas
-                .fill_rect(Rect::new(sprite.sprite.x as i32, sprite.sprite.y as i32, sprite.sprite.w, sprite.sprite.h))
+                .fill_rect(Rect::new(player.sprite.x as i32, player.sprite.y as i32, player.sprite.w, player.sprite.h))
                 .expect("could not fill rect");
             })
             .map_err(|e| e.to_string())?;
