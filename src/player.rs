@@ -65,7 +65,6 @@ pub struct SpriteWithFloat {
         pub fn update(&mut self){
             self.gravity();
             self.sprite.y += self.force_y;
-            self.sprite.x += self.force_x;
             for colliders in self.colliders.iter() {
                 if self.sprite.x + self.sprite.w as f64 > colliders.x as f64
                     && self.sprite.x < colliders.x as f64 + colliders.w as f64
@@ -74,6 +73,7 @@ pub struct SpriteWithFloat {
                 {
                     print!("1 , \n");
                     self.sprite.y = colliders.y as f64 - self.sprite.h as f64 - 1.0;
+                    self.force_y = 0.0;
                 }
                 if self.sprite.x + self.sprite.w as f64 > colliders.x as f64
                     && self.sprite.x < colliders.x as f64 + colliders.w as f64
@@ -82,7 +82,12 @@ pub struct SpriteWithFloat {
                 {
                     print!("2, \n");
                     self.sprite.y = colliders.y as f64 - 1.0;
+                    self.force_y = 0.0;
                 }
+            }
+            self.sprite.x += self.force_x;
+            for colliders in self.colliders.iter() {
+
                 if self.sprite.x + self.sprite.w as f64 > colliders.x as f64
                     && self.sprite.x - 1.0 < colliders.x as f64 + colliders.w as f64
                     && self.sprite.y + self.sprite.h as f64  > colliders.y  as f64
@@ -90,6 +95,7 @@ pub struct SpriteWithFloat {
                 {
                     print!("3, \n");
                     self.sprite.x = colliders.x as f64 + colliders.w as f64 + 1.0;
+                    self.force_x = 0.0;
                 }
                 if self.sprite.x + 1.0 + self.sprite.w as f64 > colliders.x as f64
                     && self.sprite.x < colliders.x as f64 + colliders.w as f64
@@ -98,6 +104,7 @@ pub struct SpriteWithFloat {
                 {
                     print!("4, \n");
                     self.sprite.x = colliders.x as f64 - 1.0;
+                    self.force_x = 0.0;
                 }
             }
         }

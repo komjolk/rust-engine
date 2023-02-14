@@ -31,6 +31,13 @@ fn  main() -> Result<(), String> {
         color: Color::RGBA(0, 0, 255, 0),
     });
     Sprites.push(player::sprite::Sprite {
+        x: 300,
+        y: 180,
+        w: 30,
+        h: 20,
+        color: Color::RGBA(0, 0, 255, 0),
+    });
+    Sprites.push(player::sprite::Sprite {
         x: 400,
         y: 250,
         w: 100,
