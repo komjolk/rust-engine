@@ -44,6 +44,21 @@ fn  main() -> Result<(), String> {
         h: 20,
         color: Color::RGBA(0, 0, 255, 0),
     });
+    let mut enemies = Vec::new();
+    enemies.push(player::sprite::Sprite {
+        x: 20,
+        y: 190,
+        w: 100,
+        h: 20,
+        color: Color::RGBA(255, 0, 0, 0),
+    });
+    let mut goal = player::sprite::Sprite {
+        x: 500,
+        y: 190,
+        w: 100,
+        h: 20,
+        color: Color::RGBA(0, 255, 0, 0),
+    };
     let mut player: player::Player = player::Player {
         sprite: player::SpriteWithFloat 
         { x: 50.0, y: 0.0, w: 10, h: 10, color: Color::RGBA(0, 0, 255, 0) },
@@ -58,8 +73,10 @@ fn  main() -> Result<(), String> {
         gravity: 0.1,
         has_jump: false,
         colliders: Sprites,
+        enemies: enemies,
         friction: 0.01,
-    };
+        goal: goal,
+    }; 
     let interval = Duration::from_millis(10);
     let mut next_time = Instant::now() + interval;
     let creator = canvas.texture_creator();
@@ -113,6 +130,21 @@ fn  main() -> Result<(), String> {
                         ))
                         .expect("could not fill rect");
                 }
+                for enemy in player.enemies.iter() {
+                    texture_canvas.set_draw_color(enemy.color);
+                    texture_canvas
+                        .fill_rect(Rect::new(
+                            enemy.x,
+                            enemy.y,
+                            enemy.w,
+                            enemy.h,
+                        ))
+                        .expect("could not fill rect");
+                }         
+                texture_canvas.set_draw_color(player.goal.color);
+                texture_canvas
+                .fill_rect(Rect::new(player.goal.x, player.goal.y, player.goal.w, player.goal.h))
+                .expect("could not fill rect");
                 texture_canvas.set_draw_color(player.sprite.color);
                 texture_canvas
                 .fill_rect(Rect::new(player.sprite.x as i32, player.sprite.y as i32, player.sprite.w, player.sprite.h))
