@@ -48,6 +48,8 @@ fn  main() -> Result<(), String> {
         sprite: player::SpriteWithFloat 
         { x: 50.0, y: 0.0, w: 10, h: 10, color: Color::RGBA(0, 0, 255, 0) },
         force_x: 0.1,
+        bounce: 0.4,
+        min_force: 0.03,
         force_y: 0.0,
         max_force_x: 10.0,
         max_gravity: 10.0,
