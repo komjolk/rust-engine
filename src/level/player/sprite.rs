@@ -1,4 +1,5 @@
 use sdl2::pixels::Color;
+use serde::Deserialize;
 
 pub struct Sprite {
     pub x: i32,

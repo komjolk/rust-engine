@@ -7,7 +7,7 @@ use sdl2::rect::{Point, Rect};
 use std::collections::HashSet;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
-mod player;
+mod level;
 
 fn  main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;

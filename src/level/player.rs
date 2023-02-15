@@ -8,7 +8,6 @@ pub struct SpriteWithFloat {
     pub h: u32,
     pub color: Color,
 }
-
 pub struct Player {
     pub sprite: SpriteWithFloat,
     pub bounce: f64,
@@ -25,6 +24,7 @@ pub struct Player {
     pub colliders: Vec<sprite::Sprite>,
     pub enemies: Vec<sprite::Sprite>,
     pub goal: sprite::Sprite,
+    pub win : dyn Fn(&mut Player),
 }
 
 impl Player {
