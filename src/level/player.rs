@@ -24,7 +24,7 @@ pub struct Player {
     pub colliders: Vec<sprite::Sprite>,
     pub enemies: Vec<sprite::Sprite>,
     pub goal: sprite::Sprite,
-    pub win : dyn Fn(&mut Player),
+    pub win : Box<dyn Fn(&mut Player)>,
 }
 
 impl Player {

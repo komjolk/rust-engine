@@ -22,61 +22,7 @@ fn  main() -> Result<(), String> {
         .software()
         .build()
         .map_err(|e| e.to_string())?;
-    let mut Sprites = Vec::new();
-    Sprites.push(player::sprite::Sprite {
-        x: 0,
-        y: 200,
-        w: 300,
-        h: 20,
-        color: Color::RGBA(0, 0, 255, 0),
-    });
-    Sprites.push(player::sprite::Sprite {
-        x: 300,
-        y: 180,
-        w: 30,
-        h: 20,
-        color: Color::RGBA(0, 0, 255, 0),
-    });
-    Sprites.push(player::sprite::Sprite {
-        x: 400,
-        y: 250,
-        w: 100,
-        h: 20,
-        color: Color::RGBA(0, 0, 255, 0),
-    });
-    let mut enemies = Vec::new();
-    enemies.push(player::sprite::Sprite {
-        x: 20,
-        y: 190,
-        w: 100,
-        h: 20,
-        color: Color::RGBA(255, 0, 0, 0),
-    });
-    let mut goal = player::sprite::Sprite {
-        x: 500,
-        y: 190,
-        w: 100,
-        h: 20,
-        color: Color::RGBA(0, 255, 0, 0),
-    };
-    let mut player: player::Player = player::Player {
-        sprite: player::SpriteWithFloat 
-        { x: 50.0, y: 0.0, w: 10, h: 10, color: Color::RGBA(0, 0, 255, 0) },
-        force_x: 0.1,
-        bounce: 0.4,
-        min_force: 0.03,
-        force_y: 0.0,
-        max_force_x: 10.0,
-        max_gravity: 10.0,
-        speed: 0.1,
-        jump_force: 4.0,
-        gravity: 0.1,
-        has_jump: false,
-        colliders: Sprites,
-        enemies: enemies,
-        friction: 0.01,
-        goal: goal,
-    }; 
+
     let interval = Duration::from_millis(10);
     let mut next_time = Instant::now() + interval;
     let creator = canvas.texture_creator();
@@ -86,6 +32,27 @@ fn  main() -> Result<(), String> {
 
     let mut events = sdl_context.event_pump()?;
     let mut old_keys: HashSet<Keycode> = HashSet::new();
+    let settings = level::levelSettings::LevelSettings{
+        player: level::levelSettings::SpriteWithFloat{
+            x:0.0,
+            y:0.0,
+            w:10,
+            h:10,
+            color: sdl2::pixels::Color{r : 0, g : 0, b : 0, a : 0},
+        },
+        bounce: 0.5,
+        max_gravity: 2.0,
+        max_force_x: 2.0,
+        min_force: 0.01,
+        speed: 0.02,
+        jump_force: 0.1,
+        friction: 0.01,
+        gravity: 0.1,
+        blockColor: sdl2::pixels::Color{r : 0, g : 0, b : 0, a : 0},
+        goalColor : sdl2::pixels::Color{r : 0, g : 0, b : 0, a : 0},
+        enemyColor : sdl2::pixels::Color{r : 0, g : 0, b : 0, a : 0},
+    };
+    let level = level::load_level("level.txt", settings).unwrap();
 
     'mainloop: loop {
         for event in events.poll_iter() {
@@ -106,20 +73,20 @@ fn  main() -> Result<(), String> {
             .filter_map(Keycode::from_scancode)
             .collect();
         if keys.contains(&Keycode::Right) {
-            player.move_right()
+            level.curLevel.player.move_right()
         }
         if keys.contains(&Keycode::Left) {
-            player.move_left();
+            level.curLevel.player.move_left();
         }
         if keys.contains(&Keycode::Space) && !old_keys.contains(&Keycode::Space) {
-            player.jump();
+            level.curLevel.player.jump();
         }
         old_keys = keys;
-        player.update();
+        level.curLevel.player.update();
         canvas
             .with_texture_canvas(&mut texture, |texture_canvas| {
                 texture_canvas.clear();
-                for collider in player.colliders.iter() {
+                for collider in level.curLevel.blocks.iter() {
                     texture_canvas.set_draw_color(collider.color);
                     texture_canvas
                         .fill_rect(Rect::new(
@@ -130,7 +97,7 @@ fn  main() -> Result<(), String> {
                         ))
                         .expect("could not fill rect");
                 }
-                for enemy in player.enemies.iter() {
+                for enemy in level.curLevel.enemies.iter() {
                     texture_canvas.set_draw_color(enemy.color);
                     texture_canvas
                         .fill_rect(Rect::new(
@@ -141,13 +108,13 @@ fn  main() -> Result<(), String> {
                         ))
                         .expect("could not fill rect");
                 }         
-                texture_canvas.set_draw_color(player.goal.color);
+                texture_canvas.set_draw_color(level.curLevel.goal.color);
                 texture_canvas
-                .fill_rect(Rect::new(player.goal.x, player.goal.y, player.goal.w, player.goal.h))
+                .fill_rect(Rect::new(level.curLevel.goal.x, level.curLevel.goal.y, level.curLevel.goal.w, level.curLevel.goal.h))
                 .expect("could not fill rect");
-                texture_canvas.set_draw_color(player.sprite.color);
+                texture_canvas.set_draw_color(level.curLevel.player.sprite.color);
                 texture_canvas
-                .fill_rect(Rect::new(player.sprite.x as i32, player.sprite.y as i32, player.sprite.w, player.sprite.h))
+                .fill_rect(Rect::new(level.curLevel.player.sprite.x as i32, level.curLevel.player.sprite.y as i32, level.curLevel.player.sprite.w, level.curLevel.player.sprite.h))
                 .expect("could not fill rect");
             })
             .map_err(|e| e.to_string())?;
